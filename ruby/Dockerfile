@@ -47,9 +47,10 @@ RUN echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
 RUN ./usr/local/rbenv/plugins/ruby-build/install.sh
 RUN source /etc/profile.d/rbenv.sh
 
-# install ruby 2.2.3
-RUN rbenv install 2.2.3
-RUN rbenv global 2.2.3
+# install ruby
+ADD ./ruby-version.txt /root/ruby-version.txt
+RUN xargs -L 1 rbenv install < /root/ruby-version.txt
+RUN xargs -L 1 rbenv global < /root/ruby-version.txt
 RUN rbenv rehash
 
 # install bundler
@@ -59,15 +60,15 @@ RUN rbenv rehash
 # install rails
 RUN rbenv exec gem install rails
 
-# install node
+# install node gulp
 RUN git clone https://github.com/creationix/nvm.git /usr/local/nvm
 RUN echo 'export NVM_ROOT="/usr/local/nvm"' >> /etc/profile.d/nvm.sh
 RUN echo 'source $NVM_ROOT/nvm.sh' >> /etc/profile.d/nvm.sh
-RUN source /etc/profile.d/nvm.sh && nvm install 5
+ADD ./node-version.txt /root/node-version.txt
+RUN source /etc/profile.d/nvm.sh && nvm install `cat /root/node-version.txt`
 RUN source /etc/profile.d/nvm.sh && npm install -g gulp
 
 # port
 EXPOSE 22
 
 CMD ["/usr/sbin/sshd", "-D"]
-
